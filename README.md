@@ -130,8 +130,8 @@ Für SDK-Konventionen ist **`Directory.Build.targets`** der wahrscheinlichste gl
 <a id="q7"></a>**[7]** Microsoft Learn — *Central Package Management (CPM)* (`Directory.Packages.props`, `ManagePackageVersionsCentrally`, `GlobalPackageReference`).
 <https://learn.microsoft.com/nuget/consume-packages/central-package-management>
 
-<a id="q8"></a>**[8]** Microsoft Learn — *MSBuild reference for .NET SDK projects* (Versioning-Properties: `Version`, `VersionPrefix`, `AssemblyVersion`, …).
-<https://learn.microsoft.com/dotnet/core/project-sdk/msbuild-props>
+<a id="q8"></a>**[8]** NuGet Docs — *Pack target* (kanonische Tabelle für `Version` / `PackageVersion` / `VersionPrefix` / `VersionSuffix` als MSBuild-Properties) + Microsoft Learn — *MSBuild reference for .NET SDK projects* (Top-Level-Referenz inkl. Assembly-Info- und Package-Properties-Sektionen).
+<https://learn.microsoft.com/nuget/reference/msbuild-targets#pack-target> · <https://learn.microsoft.com/dotnet/core/project-sdk/msbuild-props>
 
 <a id="q9"></a>**[9]** Microsoft Learn — *Configuration files for code analysis rules* (EditorConfig + Global AnalyzerConfig, Severity, Precedence).
 <https://learn.microsoft.com/dotnet/fundamentals/code-analysis/configuration-files>
