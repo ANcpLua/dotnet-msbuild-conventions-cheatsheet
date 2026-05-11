@@ -1,0 +1,14 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# MSBuild scratch (in case anyone drops a sample project here)
+bin/
+obj/
+preprocessed.xml
