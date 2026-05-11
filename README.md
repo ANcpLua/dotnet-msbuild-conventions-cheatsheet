@@ -1,6 +1,6 @@
 # .NET MSBuild SDK-Konventionen — Spickzettel
 
-![.NET SDK](https://img.shields.io/badge/.NET-SDK-512BD4?logo=dotnet&logoColor=white)
+![.NET SDK](https://img.shields.io/badge/.NET%20SDK-512BD4?logo=dotnet&logoColor=white)
 ![MSBuild](https://img.shields.io/badge/MSBuild-Conventions-178600)
 ![Sources](https://img.shields.io/badge/Sources-Microsoft%20Learn-0078D4?logo=microsoft&logoColor=white)
 ![License](https://img.shields.io/badge/License-CC0--1.0-lightgrey)
