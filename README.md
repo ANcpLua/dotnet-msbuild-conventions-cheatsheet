@@ -1,16 +1,56 @@
 # .NET MSBuild SDK-Konventionen — Spickzettel
 
-Reine Referenz: Verbatim-Quotes aus offizieller Microsoft-/dotnet-Dokumentation für die in einem typischen .NET-SDK-Repo einschlägigen MSBuild-Dateien. Keine eigene Einschätzung.
+![.NET SDK](https://img.shields.io/badge/.NET-SDK-512BD4?logo=dotnet&logoColor=white)
+![MSBuild](https://img.shields.io/badge/MSBuild-Conventions-178600)
+![Sources](https://img.shields.io/badge/Sources-Microsoft%20Learn-0078D4?logo=microsoft&logoColor=white)
+![License](https://img.shields.io/badge/License-CC0--1.0-lightgrey)
+![Verified](https://img.shields.io/badge/HTTP%20200-16%2F16-success)
+
+> [!NOTE]
+> Reine Referenz: Verbatim-Quotes aus offizieller Microsoft-/dotnet-Dokumentation für die in einem typischen .NET-SDK-Repo einschlägigen MSBuild-Dateien. **Keine eigene Einschätzung** — jede Aussage ist direkt zitiert und mit Quelle verlinkt.
+
+---
+
+## Inhalt
+
+- [Teil A — Dateien, die MSBuild selbst kennt](#teil-a--dateien-die-msbuild-per-konvention-selbst-kennt)
+- [Teil B — Repo-spezifische Dateinamen](#teil-b--repo-spezifische-dateinamen)
+- [Teil C — Konventionsrelevante Begleitdateien](#teil-c--konventionsrelevante-begleitdateien)
+- [Praktisch prüfen](#praktisch-prüfen--direkt-aus-der-doku)
+- [Quellenverzeichnis](#quellenverzeichnis)
 
 ---
 
 ## Teil A — Dateien, die MSBuild per Konvention selbst kennt
 
-Diese Dateinamen sind in Microsoft-Doku belegt. Für jede Datei: was die Doku tatsächlich sagt.
+> [!IMPORTANT]
+> Diese Dateinamen sind in Microsoft-Doku belegt. Was sie tun, wird unten **verbatim** zitiert.
+
+### Import-Reihenfolge (visuell)
+
+```mermaid
+flowchart TD
+    M1["Microsoft.Common.props"] -->|"imports early"| DBP["Directory.Build.props"]
+    DBP --> CSPROJ["Projektdatei (.csproj)"]
+    CSPROJ --> NPROPS["NuGet *.props"]
+    NPROPS --> BODY["Projekt-Body"]
+    BODY --> NTARGETS["NuGet *.targets"]
+    NTARGETS --> DBT["Directory.Build.targets"]
+    DBT -->|"imports late"| M2["Microsoft.Common.targets"]
+
+    classDef msbuild fill:#0078D4,stroke:#0050A0,color:#fff,font-weight:bold;
+    classDef user fill:#512BD4,stroke:#3A1F9B,color:#fff;
+    classDef pkg fill:#888,stroke:#555,color:#fff;
+    class M1,M2 msbuild;
+    class DBP,DBT user;
+    class CSPROJ,NPROPS,BODY,NTARGETS pkg;
+```
+
+<sub>Blau = MSBuild-System-Imports · Violett = Repo-Defaults/Enforcement · Grau = Projekt/Pakete</sub>
 
 ### `Directory.Build.props`
 
-> "*Microsoft.Common.props* searches your directory structure for the *Directory.Build.props* file. If it finds one, it imports the file and reads the properties defined within it." — [[1]](#q1)
+> *"Microsoft.Common.props* searches your directory structure for the *Directory.Build.props* file. If it finds one, it imports the file and reads the properties defined within it." — [[1]](#q1)
 
 > "*Directory.Build.props* is imported early in the sequence of imported files, which can be important if you need to set a property that is used by imports, especially those that are implicitly imported by using the `Sdk` attribute, such as when using the .NET SDK in most .NET project files." — [[1]](#q1)
 
@@ -34,28 +74,29 @@ Diese Dateinamen sind in Microsoft-Doku belegt. Für jede Datei: was die Doku ta
 
 ### `BannedSymbols.txt` / `BannedSymbols.*.txt`
 
-> Aus der `BannedApiAnalyzers.Help.md`: die Datei(en) `BannedSymbols.txt` bzw. `BannedSymbols.*.txt` werden über `AdditionalFiles` ins Projekt eingebunden, damit der Analyzer sie liest. — [[14]](#q14)
+Über `<AdditionalFiles>` ins Projekt eingebunden, damit der `Microsoft.CodeAnalysis.BannedApiAnalyzers`-Analyzer sie liest. Die Doku nennt die beiden Dateinamen-Muster `BannedSymbols.txt` und `BannedSymbols.*.txt`. — [[14]](#q14)
 
-> XML-Form laut Doku:
-> ```xml
-> <ItemGroup>
->   <AdditionalFiles Include="BannedSymbols.txt" />
-> </ItemGroup>
-> ```
-> — [[14]](#q14)
+```xml
+<ItemGroup>
+  <AdditionalFiles Include="BannedSymbols.txt" />
+</ItemGroup>
+```
+
+<sub>XML-Form laut [[14]](#q14).</sub>
 
 ---
 
 ## Teil B — Repo-spezifische Dateinamen
 
-`Build/Common/*` und `Build/Enforcement/*` sind **keine** offiziellen MSBuild-Konventionen. MSBuild kennt nur die `Directory.*`-Dateien aus Teil A implizit. Was unter `Build/...` liegt, wird in deinem Repo per `<Import Project="…" />` aus den `Directory.Build.*`-Dateien eingebunden.
-
-Es gibt also keine Microsoft-Doku zu diesen Dateinamen. Belegbar ist nur, was die typischerweise dort gesetzten **Properties** offiziell bedeuten.
+> [!WARNING]
+> `Build/Common/*` und `Build/Enforcement/*` sind **keine** offiziellen MSBuild-Konventionen. MSBuild kennt nur die `Directory.*`-Dateien aus Teil A implizit. Was unter `Build/...` liegt, wird in deinem Repo per `<Import Project="…" />` aus den `Directory.Build.*`-Dateien eingebunden.
+>
+> Es gibt also keine Microsoft-Doku zu diesen Dateinamen. Belegbar ist nur, was die typischerweise dort gesetzten **Properties** offiziell bedeuten.
 
 ### `Build/Common/Common.props` — typische Properties
 
 | Property | Verbatim aus MS-Doku | Quelle |
-| --- | --- | --- |
+| --- | --- | :---: |
 | `LangVersion` | "The **LangVersion** option causes the compiler to accept only syntax that is included in the specified C# language specification" | [[3]](#q3) |
 | `Nullable` | "The **Nullable** option lets you specify the nullable context. […] The argument must be one of `enable`, `disable`, `warnings`, or `annotations`." | [[4]](#q4) |
 | `TreatWarningsAsErrors` | "The **TreatWarningsAsErrors** option treats all warnings as errors." | [[5]](#q5) |
@@ -63,7 +104,7 @@ Es gibt also keine Microsoft-Doku zu diesen Dateinamen. Belegbar ist nur, was di
 ### `Build/Common/GlobalPackages.props` / `Build/Common/Version.props`
 
 | Property | Verbatim aus MS-Doku | Quelle |
-| --- | --- | --- |
+| --- | --- | :---: |
 | `ManagePackageVersionsCentrally` | "set the MSBuild property `ManagePackageVersionsCentrally` to `true`" | [[7]](#q7) |
 | `<PackageVersion />` Item | "define `<PackageVersion />` elements to specify the package IDs and versions used by your projects" | [[7]](#q7) |
 | `Version` / `VersionPrefix` / `VersionSuffix` / `PackageVersion` | Pack-Target-Tabelle: `Version` → `PackageVersion` (Default = `Version`); `VersionPrefix` / `VersionSuffix` separat überschreibbar | [[8]](#q8) |
@@ -71,7 +112,7 @@ Es gibt also keine Microsoft-Doku zu diesen Dateinamen. Belegbar ist nur, was di
 ### `Build/Enforcement/DeterminismAndSourceLink.props`
 
 | Property | Verbatim aus MS-Doku | Quelle |
-| --- | --- | --- |
+| --- | --- | :---: |
 | `Deterministic` | "Causes the compiler to produce an assembly whose byte-for-byte output is identical across compilations for identical inputs." | [[10]](#q10) |
 | `Deterministic`-Default | "For modern .NET projects, deterministic compilation is enabled by default (the `Deterministic` property defaults to `true`)." | [[10]](#q10) |
 | SourceLink | "Source Link is a technology that enables source code debugging of .NET assemblies from NuGet by developers. Source Link executes when creating the NuGet package and embeds source control metadata inside assemblies and the package." | [[11]](#q11) |
@@ -80,34 +121,53 @@ Es gibt also keine Microsoft-Doku zu diesen Dateinamen. Belegbar ist nur, was di
 
 > "The `ContinuousIntegrationBuild` property indicates whether a build is executing on a continuous integration (CI) server. When set to `true`, this property enables settings that only apply to official builds as opposed to local builds on a developer machine. For example, stored file paths are normalized for official builds." — [[12]](#q12)
 
-> Beispiel aus der Doku für GitHub Actions:
-> ```xml
-> <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
->   <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
-> </PropertyGroup>
-> ```
-> — [[12]](#q12)
+```xml
+<PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
+  <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+</PropertyGroup>
+```
+
+<sub>Beispiel aus der Doku für GitHub Actions — [[12]](#q12).</sub>
 
 ### `Build/Common/SourceGenerators.targets`
 
 > "Source generators aim to enable *compile time metaprogramming*, that is, code that can be created at compile time and added to the compilation. Source generators are able to read the contents of the compilation before running, as well as access any *additional files*." — [[6]](#q6)
 
-### `Build/Common/Tests.targets`, `Build/Common/Npm.targets`, `Build/Common/Common.targets`, `Build/Enforcement/Enforcement.props`, `Build/Enforcement/VersionEnforcement.targets`
+### Sonstige `Build/Common/*` & `Build/Enforcement/*`
 
-Keine Microsoft-Doku zu diesen Dateinamen. Inhalt ist Repo-Konvention. Was `<Import>` und `Directory.Build.targets`-Mechanik betrifft, gilt Teil A [[1]](#q1).
+<details>
+<summary><b>Dateien ohne Microsoft-Doku-Belege</b> (aufklappen)</summary>
+
+Folgende Dateinamen sind reine Repo-Konvention — es gibt **keine** offizielle Microsoft-Doku zu ihnen. Inhalt richtet sich nach dem jeweiligen Repo:
+
+- `Build/Common/Common.targets`
+- `Build/Common/Tests.targets`
+- `Build/Common/Npm.targets`
+- `Build/Enforcement/Enforcement.props`
+- `Build/Enforcement/VersionEnforcement.targets`
+
+Was `<Import>` und die `Directory.Build.targets`-Mechanik betrifft, gilt Teil A [[1]](#q1).
+
+</details>
 
 ---
 
-## Teil C — Konventionsrelevante Begleit­dateien
+## Teil C — Konventionsrelevante Begleitdateien
+
+> [!NOTE]
+> EditorConfig-Varianten sind kein MSBuild-Format, werden aber über das Roslyn-Analyzer-System konventionsrelevant. Quellen wie für Teil A belegt.
 
 | Datei | Verbatim aus MS-Doku | Quelle |
-| --- | --- | --- |
+| --- | --- | :---: |
 | `Global.editorconfig`, `CodingStyle.editorconfig` | "EditorConfig files are used to provide options that apply to specific source files or folders." | [[9]](#q9) |
 | `Compiler.editorconfig`, `Analyzer.*.editorconfig` | "Code analysis rules have various configuration options. You specify these options as key-value pairs in one of the following analyzer configuration files: EditorConfig file […]; Global AnalyzerConfig file […]" | [[9]](#q9) |
 
 ---
 
 ## Praktisch prüfen — direkt aus der Doku
+
+> [!TIP]
+> Den vollständigen Import-Graph als „präprozessiertes" XML dumpen — laut Doku der empfohlene Weg, um nachzuvollziehen, welche Datei welche Property setzt.
 
 > "`-preprocess[:{filepath}]` `-pp[:{filepath}]` — Create a single, aggregated project file by inlining all the files that would be imported during a build, with their boundaries marked. You can use this switch to more easily determine which files are being imported, from where the files are being imported, and which files contribute to the build." — [[15]](#q15)
 
